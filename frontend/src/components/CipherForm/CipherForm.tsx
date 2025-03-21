@@ -3,51 +3,53 @@ import Grid from '@mui/material/Grid2';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {useEffect, useState} from "react";
-import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
+import {useAppDispatch} from "../../app/hooks.ts";
 import {submitMessageForEncryption, submitMessageForTranscription} from "../../store/Cipher/CipherThunks.ts";
 import {IData} from "../../types";
-import {
-    selectDecodedMessage,
-    selectEncodeMessage,
-    selectLoading
-} from "../../store/Cipher/CipherSlice.ts";
+import * as React from "react";
+
+interface Props {
+    encryptedMessage: string;
+    decryptedMessage: string;
+    loading?: boolean;
+}
 
 const initialState: IData = {
     password: "",
     message: "",
 }
 
-const CipherForm = () => {
+const CipherForm: React.FC<Props> = ({decryptedMessage, encryptedMessage, loading = false}) => {
     const [form, setForm] = useState(initialState);
     const [encodeMessage, setEncodeMessage] = useState("");
     const [password, setPassword] = useState("");
+
     const dispatch = useAppDispatch();
 
-    const encryptedMessage = useAppSelector(selectEncodeMessage);
-    const decryptedMessage = useAppSelector(selectDecodedMessage);
-    const loading = useAppSelector(selectLoading);
-
     useEffect(() => {
-        setEncodeMessage(encryptedMessage);
-    }, [encryptedMessage]);
-
-    useEffect(() => {
-        setForm({password: "", message: decryptedMessage});
+        if (decryptedMessage) {
+            setForm((prevState) => ({ ...prevState, message: decryptedMessage }));
+        }
     }, [decryptedMessage]);
+
+    useEffect(() => {
+        if (encryptedMessage) {
+            setEncodeMessage(encryptedMessage);
+        }
+    }, [encryptedMessage]);
 
     const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setForm(initialState);
     };
 
     const encryptMessage = async () => {
-        if(form.message.trim().length === 0 || form.password.trim().length === 0){
+        if (form.message.trim().length === 0 || form.password.trim().length === 0) {
             alert("Please, enter both message and password");
             return;
         }
         await dispatch(submitMessageForEncryption(form));
         setPassword(form.password);
-        setForm(initialState);
+        setForm((prev) => ({ ...prev, message: "" }));
     };
 
     const messageDecoding = async () => {
@@ -61,21 +63,20 @@ const CipherForm = () => {
             return;
         }
 
-        if(encodeMessage.trim() === ""){
+        if (encodeMessage.trim() === "") {
             alert("Please enter a coded message");
             return;
         }
 
         await dispatch(submitMessageForTranscription({...form, message: encodeMessage}));
         setEncodeMessage("");
-        setPassword("");
     };
 
     const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setForm({...form, [name]: value});
-        if(name === "encodeMessage") {
-           setEncodeMessage(value);
+        if (name === "encodeMessage") {
+            setEncodeMessage(value);
         }
     };
 

@@ -1,6 +1,7 @@
 import AppToolbar from "../AppToolbar/AppToolbar.tsx";
 import {Container} from "@mui/material";
 import {PropsWithChildren} from "react";
+import * as React from "react";
 
 const Layout: React.FC<PropsWithChildren> = ({children}) => {
     return (

@@ -36,7 +36,7 @@ app.post("/decode", async (req, res) => {
 
     if (!data) {
         res.status(400).send({error: "Invalid Credentials"});
-       return;
+        return;
     }
 
     if (req.body.password.trim() === "" || req.body.message.trim() === "") {
@@ -44,13 +44,13 @@ app.post("/decode", async (req, res) => {
         return;
     }
 
-    if(req.body.message === encodeMessage && req.body.password === data.password) {
-        const decodeMessage = await Vigenere.Decipher(data.password).crypt(req.body.message);
-        res.send({decoded: decodeMessage});
+    if (req.body.message !== encodeMessage && req.body.password !== data.password) {
+        res.status(400).send({error: "incorrect data"});
         return;
     }
 
-    res.status(400).send({error: "incorrect data"});
+    const decodeMessage = await Vigenere.Decipher(data.password).crypt(req.body.message);
+    res.send({decoded: decodeMessage});
 
 });
 
